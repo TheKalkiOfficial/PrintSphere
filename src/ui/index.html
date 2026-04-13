@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintSphere</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-titlebar">
+            <div class="title-meta">
+                <i class="bi bi-printer-fill"></i>
+                <div>
+                    <h1><span id="panelPrinterTitle">ZPL</span> Printer v3.0.13</h1>
+                    <p>PrintSphere</p>
+                </div>
+            </div>
+            <button class="icon-button ghost" id="windowCloseBtn" type="button" aria-label="Close window">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <main class="workspace">
+            <section class="top-toolbar">
+                <div class="segmented-control" id="languageModeSwitch">
+                    <button class="active" data-mode="ZPL" type="button">ZPL</button>
+                    <button data-mode="TSPL" type="button">TSPL</button>
+                    <button data-mode="CPCL" type="button">CPCL</button>
+                    <button data-mode="ESC/POS" type="button">ESC/POS</button>
+                </div>
+
+                <button class="icon-button" id="testOpenBtn" type="button" aria-label="Open raw print tester">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+
+                <div class="spacer"></div>
+
+                <div class="segmented-control power-control" id="powerToggle">
+                    <button data-running="true" type="button">ON</button>
+                    <button class="active" data-running="false" type="button">OFF</button>
+                </div>
+
+                <button class="icon-button" id="clearJobsBtn" type="button" aria-label="Clear labels">
+                    <i class="bi bi-trash3"></i>
+                </button>
+
+                <button class="icon-button" id="settingsOpenBtn" type="button" aria-label="Open printer settings">
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+            </section>
+
+            <section class="preview-frame">
+                <div class="preview-header">
+                    <div>
+                        <h2>Live Label Preview</h2>
+                        <p id="previewHint">Printer service is OFF. Use the ON button to start listening on 0.0.0.0:9100</p>
+                    </div>
+                    <div class="toolbar-note" id="jobCountBadge">0 jobs</div>
+                </div>
+
+                <div class="preview-body preview-body-single">
+                    <div class="preview-stack">
+                        <div class="preview-canvas protocol-panel active" id="zplPreviewPanel" data-protocol="ZPL">
+                            <div id="zplPreviewCanvas" class="protocol-preview-surface"></div>
+                        </div>
+                        <div class="preview-canvas protocol-panel" id="escposPreviewPanel" data-protocol="ESC/POS">
+                            <div id="escposPreviewCanvas" class="protocol-preview-surface escpos-surface"></div>
+                        </div>
+                        <div class="preview-canvas protocol-panel" id="genericPreviewPanel" data-protocol="GENERIC">
+                            <div id="genericPreviewCanvas" class="protocol-preview-surface"></div>
+                        </div>
+                    </div>
+
+                    <aside class="job-sidebar">
+                        <div class="job-sidebar-header">
+                            <h3>Recent Jobs</h3>
+                            <label class="toggle-row" for="autoRefreshToggle">
+                                <input id="autoRefreshToggle" type="checkbox" checked>
+                                <span>Auto refresh</span>
+                            </label>
+                        </div>
+                        <div class="job-list" id="jobsContainer"></div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="notification-toast hidden" id="statusToast" role="status" aria-live="polite">
+        <div class="status-pill">
+            <i class="bi bi-info-circle-fill"></i>
+            <span id="serverStatusText">Connecting to printer service...</span>
+        </div>
+        <div class="status-meta">
+            <span>Host: <strong id="statusHost">0.0.0.0</strong></span>
+            <span>Port: <strong id="statusPort">9100</strong></span>
+        </div>
+        <button class="toast-close" id="statusToastCloseBtn" type="button" aria-label="Dismiss notification">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="modal-backdrop hidden" id="testModal">
+        <div class="settings-modal modal-narrow" role="dialog" aria-modal="true" aria-labelledby="testTitle">
+            <div class="modal-header">
+                <div class="title-meta">
+                    <i class="bi bi-send-fill"></i>
+                    <div>
+                        <h2 id="testTitle"><span id="testPrinterTitle">ZPL</span> Printer Test</h2>
+                        <p>Send raw printer data directly into the emulator without using the TCP socket.</p>
+                    </div>
+                </div>
+                <button class="icon-button ghost" id="testCloseBtn" type="button" aria-label="Close test window">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="testForm" class="settings-form">
+                <label class="field">
+                    <span>Raw Text Data</span>
+                    <textarea id="testData" class="test-textarea" placeholder="Paste raw ZPL or ESC/POS data here"></textarea>
+                </label>
+                <div class="modal-actions modal-actions-spread">
+                    <div class="inline-action-group">
+                        <button class="secondary-button" id="testHelloBtn" type="button">
+                            <i class="bi bi-stars"></i>
+                            Hello World
+                        </button>
+                    </div>
+                    <div class="inline-action-group">
+                        <button class="secondary-button" id="testCancelBtn" type="button">
+                            <i class="bi bi-x-lg"></i>
+                            Close
+                        </button>
+                        <button class="primary-button" type="submit">
+                            <i class="bi bi-printer-fill"></i>
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="settingsModal">
+        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal-header">
+                <div class="title-meta">
+                    <i class="bi bi-gear-fill"></i>
+                    <div>
+                        <h2 id="settingsTitle">ZPL Printer Settings</h2>
+                        <p>Configure printer properties, network behavior, storage, and protocol status responses.</p>
+                    </div>
+                </div>
+                <button class="icon-button ghost" id="settingsCloseBtn" type="button" aria-label="Close settings">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form id="settingsForm" class="settings-form">
+                <fieldset class="settings-section">
+                    <legend>Printer Properties</legend>
+                    <div class="settings-grid two-column zpl-only">
+                        <label class="field">
+                            <span>Print Density</span>
+                            <select name="printDensity">
+                                <option value="6 dpmm (152 dpi)">6 dpmm (152 dpi)</option>
+                                <option value="8 dpmm (203 dpi)">8 dpmm (203 dpi)</option>
+                                <option value="12 dpmm (300 dpi)">12 dpmm (300 dpi)</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="settings-grid three-column">
+                        <label class="field">
+                            <span>Unit Size</span>
+                            <select name="unit">
+                                <option value="inches">inches (in)</option>
+                                <option value="centimeters">centimeters (cm)</option>
+                                <option value="millimeters">millimeters (mm)</option>
+                                <option value="pixels">pixels (px)</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>Width</span>
+                            <input type="number" min="1" name="width" placeholder="58">
+                        </label>
+                        <label class="field">
+                            <span>Height</span>
+                            <input type="number" min="1" name="height" placeholder="100">
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="settings-section">
+                    <legend>Network</legend>
+                    <div class="settings-grid two-column">
+                        <label class="field">
+                            <span>Host</span>
+                            <input type="text" name="host" placeholder="0.0.0.0">
+                        </label>
+                        <label class="field">
+                            <span>Port</span>
+                            <input type="number" min="1" name="port" placeholder="9100">
+                        </label>
+                    </div>
+
+                    <div class="settings-grid network-advanced">
+                        <label class="field small-field">
+                            <span>Buffer Size</span>
+                            <div class="inline-field">
+                                <input type="number" min="128" step="128" name="bufferSize" placeholder="4096">
+                                <span class="unit-pill">B</span>
+                            </div>
+                        </label>
+
+                        <label class="check-card">
+                            <input type="checkbox" name="keepTcpAlive">
+                            <span class="check-mark"></span>
+                            <span class="check-copy">Keep TCP socket alive</span>
+                            <span class="check-help" title="Useful for long-lived printer redirector clients.">
+                                <i class="bi bi-question-circle-fill"></i>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="settings-section">
+                    <legend>Storage</legend>
+                    <div class="storage-row">
+                        <label class="check-card compact">
+                            <input type="checkbox" name="saveLabels">
+                            <span class="check-mark"></span>
+                            <span class="check-copy">Save labels</span>
+                        </label>
+
+                        <label class="field file-type-field">
+                            <span>File Type</span>
+                            <select name="fileType">
+                                <option value="svg">SVG</option>
+                                <option value="json">JSON</option>
+                                <option value="txt">RAW</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="field directory-field">
+                        <span>Directory Path</span>
+                        <div class="directory-picker">
+                            <input type="text" name="directoryPath" placeholder="D:\printer\output">
+                            <button type="button" id="directorySuggestBtn">Choose</button>
+                        </div>
+                    </label>
+                </fieldset>
+
+                <section class="settings-tabs zpl-only">
+                    <div class="tab-header">
+                        <button class="tab-button active" type="button" data-tab="zpl-status">ZPL Status</button>
+                        <button class="tab-button" type="button" data-tab="zpl-warnings">ZPL Warnings</button>
+                        <button class="tab-button" type="button" data-tab="zpl-errors">ZPL Errors</button>
+                    </div>
+
+                    <div class="tab-panel active" data-panel="zpl-status">
+                        <div class="status-grid" id="statusGrid"></div>
+                    </div>
+
+                    <div class="tab-panel" data-panel="zpl-warnings">
+                        <div class="status-grid" id="warningGrid"></div>
+                    </div>
+
+                    <div class="tab-panel" data-panel="zpl-errors">
+                        <div class="status-grid" id="errorGrid"></div>
+                    </div>
+                </section>
+
+                <section class="settings-tabs esc-only hidden">
+                    <div class="tab-header">
+                        <button class="tab-button active" type="button" data-tab="escpos-status">ESC/POS Status</button>
+                    </div>
+
+                    <div class="tab-panel active" data-panel="escpos-status">
+                        <div class="status-grid" id="escposStatusGrid"></div>
+                    </div>
+                </section>
+
+                <div class="modal-actions">
+                    <button class="secondary-button" id="settingsCancelBtn" type="button">
+                        <i class="bi bi-x-lg"></i>
+                        Close
+                    </button>
+                    <button class="primary-button" type="submit">
+                        <i class="bi bi-save-fill"></i>
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

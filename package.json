@@ -1,0 +1,25 @@
+{
+  "name": "printsphere",
+  "version": "1.0.0",
+  "description": "PrintSphere supporting ZPL, TSPL, and CPCL with TCP/IP server and real-time rendering",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "server": "node src/server/PrintSphereServer.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": ["printer", "emulator", "ZPL", "TSPL", "CPCL", "label", "barcode", "qrcode"],
+  "author": "PrintSphere Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "jsbarcode": "^3.11.5",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

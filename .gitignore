@@ -1,0 +1,12 @@
+node_modules/
+*.log
+*.tmp
+.DS_Store
+dist/
+build/
+output/
+.env
+.env.local
+*.swp
+*.swo
+*~

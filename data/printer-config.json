@@ -1,0 +1,60 @@
+{
+  "width": 203,
+  "height": 203,
+  "dpi": 203,
+  "unit": "millimeters",
+  "printDensity": "8 dpmm (203 dpi)",
+  "host": "0.0.0.0",
+  "port": 9100,
+  "autoDetect": true,
+  "maxJobSize": 10485760,
+  "bufferSize": 1024,
+  "keepTcpAlive": true,
+  "saveLabels": false,
+  "fileType": "svg",
+  "directoryPath": "",
+  "languageMode": "ESC/POS",
+  "protocolMode": "ESC/POS",
+  "zplStatus": {
+    "headOpen": false,
+    "paperOut": false,
+    "ribbonOut": false,
+    "paperJam": false,
+    "printerPaused": false,
+    "cutterFault": false,
+    "headTooHot": false,
+    "motorOverheat": false,
+    "rewindFault": false
+  },
+  "zplWarnings": {
+    "mediaNearEnd": false,
+    "ribbonNearEnd": false,
+    "replacePrinthead": false,
+    "cleanPrinthead": false
+  },
+  "zplErrors": {
+    "mediaOut": false,
+    "ribbonOut": false,
+    "headOpen": false,
+    "cutterFault": false,
+    "printheadOverTemp": false,
+    "motorOverTemp": false,
+    "badPrintheadElement": false,
+    "printheadDetectionError": false
+  },
+  "escposStatus": {
+    "online": true,
+    "paperFeedPressed": false,
+    "coverOpen": false,
+    "paperBeingFed": false,
+    "paperEnd": false,
+    "errorOccurred": false,
+    "recoverableError": false,
+    "cutterError": false,
+    "unrecoverableError": false,
+    "autoRecoverableError": false,
+    "paperLow": false
+  },
+  "timeout": 30000,
+  "logLevel": "info"
+}
