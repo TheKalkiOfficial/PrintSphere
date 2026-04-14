@@ -29,7 +29,7 @@ Integrating a physical printer into your development workflow can be cumbersome.
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/printsphere.git
+git clone https://github.com/TheKalkiOfficial/PrintSphere.git
 cd printsphere
 npm install
 ```
